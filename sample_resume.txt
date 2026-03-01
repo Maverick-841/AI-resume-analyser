@@ -1,0 +1,20 @@
+John Doe
+Software Engineer
+Email: john.doe@example.com
+Phone: (123) 456-7890
+Location: San Francisco, CA
+
+SUMMARY:
+Passionate Software Engineer with 2 years of experience in building web applications using JavaScript and Python. Seeking a role at a fast-growing tech company.
+
+EXPERIENCE:
+Junior Web Developer | Tech Solutions Inc. | 2022 - Present
+- Built frontend components using React.
+- Worked with MongoDB and Node.js.
+- Improved site performance by 10%.
+
+SKILLS:
+JavaScript, React, Node.js, MongoDB, HTML, CSS, Git.
+
+EDUCATION:
+B.S. in Computer Science | University of Technology
