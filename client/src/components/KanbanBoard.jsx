@@ -15,8 +15,16 @@ export default function KanbanBoard() {
     }, []);
 
     const fetchJobs = async () => {
-        const { data } = await api.get('/jobs');
-        setJobs(data);
+        try {
+            const { data } = await api.get('/jobs');
+            setJobs(data);
+        } catch (err) {
+            console.error('Fetch Jobs Failed:', err);
+            // If it's a 401, the interceptor handles it. For others, show an alert.
+            if (err.response?.status !== 401) {
+                alert('Could not fetch jobs. Please check your connection.');
+            }
+        }
     };
 
     const onDragEnd = async (result) => {
@@ -31,23 +39,33 @@ export default function KanbanBoard() {
         try {
             await api.patch(`/jobs/${draggableId}`, { status: newStatus });
         } catch (err) {
-            console.error(err);
+            console.error('Update Status Failed:', err);
             fetchJobs(); // Revert on error
         }
     };
 
     const handleAddJob = async (e) => {
         e.preventDefault();
-        const { data } = await api.post('/jobs', newJob);
-        setJobs([data, ...jobs]);
-        setShowModal(false);
-        setNewJob({ company: '', position: '', location: '', link: '', status: 'Applied' });
+        try {
+            const { data } = await api.post('/jobs', newJob);
+            setJobs([data, ...jobs]);
+            setShowModal(false);
+            setNewJob({ company: '', position: '', location: '', link: '', status: 'Applied' });
+        } catch (err) {
+            console.error('Add Job Failed:', err);
+            alert(err.response?.data?.message || 'Failed to add job. Please try again.');
+        }
     };
 
     const handleDelete = async (id) => {
         if (!confirm('Are you sure you want to delete this job?')) return;
-        await api.delete(`/jobs/${id}`);
-        setJobs(jobs.filter(j => j._id !== id));
+        try {
+            await api.delete(`/jobs/${id}`);
+            setJobs(jobs.filter(j => j._id !== id));
+        } catch (err) {
+            console.error('Delete Job Failed:', err);
+            alert('Failed to delete job.');
+        }
     };
 
     return (

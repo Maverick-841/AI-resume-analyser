@@ -4,6 +4,8 @@ const auth = require('../middleware/auth');
 const { OpenAI } = require('openai');
 const multer = require('multer');
 
+const pdf = require('pdf-parse');
+
 // Configure Multer for PDF/Text uploads
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -27,19 +29,29 @@ router.post('/analyze', auth, upload.single('resume'), async (req, res) => {
             return res.status(400).json({ message: 'Please upload a resume file' });
         }
 
-        const resumeText = req.file.buffer.toString('utf-8'); // Note: Simple buffer to string for text files. For PDFs, we'd need a PDF parser.
+        const jobDescription = req.body.jobDescription || "";
+        let resumeText = "";
+
+        if (req.file.mimetype === 'application/pdf') {
+            const pdfData = await pdf(req.file.buffer);
+            resumeText = pdfData.text;
+        } else {
+            resumeText = req.file.buffer.toString('utf-8');
+        }
+
+        const systemPrompt = jobDescription
+            ? "You are an expert career coach and ATS optimization specialist. Analyze the provided resume against the Job Description (JD). Provide feedback in JSON format with keys: 'matchScore' (0-100), 'score' (general ATS score 0-100), 'strengths' (array), 'weaknesses' (array), 'suggestions' (array), 'keywords' (array of missing keywords from JD), and 'smartRewrites' (array of objects with { original: string, improved: string })."
+            : "You are an expert career coach and ATS optimization specialist. Analyze the provided resume text and provide feedback in JSON format with keys: 'score' (out of 100), 'strengths' (array), 'weaknesses' (array), 'suggestions' (array), and 'keywords' (array of missing keywords).";
+
+        const userPrompt = jobDescription
+            ? `Job Description: \n${jobDescription}\n\nResume: \n${resumeText}`
+            : `Analyze this resume: \n\n${resumeText}`;
 
         const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
+            model: "gpt-4o-mini", // Better availability and performance
             messages: [
-                {
-                    role: "system",
-                    content: "You are an expert career coach and ATS optimization specialist. Analyze the provided resume text and provide feedback in JSON format with keys: 'score' (out of 100), 'strengths' (array), 'weaknesses' (array), 'suggestions' (array), and 'keywords' (array of missing keywords)."
-                },
-                {
-                    role: "user",
-                    content: `Analyze this resume: \n\n${resumeText}`
-                }
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userPrompt }
             ],
             response_format: { type: "json_object" }
         });

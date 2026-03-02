@@ -8,11 +8,23 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
+        const checkAuth = async () => {
+            const token = localStorage.getItem('token');
+            const storedUser = localStorage.getItem('user');
+
+            if (token && storedUser) {
+                try {
+                    // Simple check-auth endpoint or just try fetching profile
+                    const { data } = await api.get('/auth/me');
+                    setUser(data);
+                } catch (err) {
+                    console.error('Session Invalid:', err);
+                    logout();
+                }
+            }
+            setLoading(false);
+        };
+        checkAuth();
     }, []);
 
     const login = async (email, password) => {
