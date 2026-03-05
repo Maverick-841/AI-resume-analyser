@@ -20,3 +20,9 @@ A full-stack application for job seekers to track their applications and analyze
 2. Install dependencies for both `client` and `server`.
 3. Add your `OPENAI_API_KEY` to the `server/.env` file.
 4. Run `npm start` in the `server` directory and `npm run dev` in the `client` directory.
+
+## License
+MIT License - feel free to use and modify!
+
+## Screenshots
+*(Screenshots coming soon)*
