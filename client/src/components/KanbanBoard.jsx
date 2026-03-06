@@ -124,6 +124,20 @@ export default function KanbanBoard() {
                                                 )}
                                             </Draggable>
                                         ))}
+                                        {jobs.filter(j => j.status === col.id).length === 0 && (
+                                            <div style={{
+                                                textAlign: 'center',
+                                                padding: '2rem 1rem',
+                                                color: 'var(--text-muted)',
+                                                fontSize: '0.8rem',
+                                                border: '1px dashed var(--border)',
+                                                borderRadius: '12px',
+                                                opacity: 0.5,
+                                                marginBottom: '1rem'
+                                            }}>
+                                                No applications yet
+                                            </div>
+                                        )}
                                         {provided.placeholder}
                                     </div>
                                 )}
