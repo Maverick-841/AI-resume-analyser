@@ -61,6 +61,7 @@ function App() {
                     <button className="btn" onClick={logout} style={{ background: 'none', color: 'var(--danger)', justifyContent: 'flex-start', padding: '0.5rem' }}>
                         <LogOut size={18} /> Logout
                     </button>
+                    <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: 'auto', opacity: 0.5 }}>v1.0.0 Stable</p>
                 </div>
             </nav>
 
