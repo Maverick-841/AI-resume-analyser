@@ -64,9 +64,19 @@ export default function ResumeAnalyzer() {
                 </div>
 
                 <div className="glass" style={{ padding: '2rem' }}>
-                    <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '1.1rem' }}>
-                        <Target size={20} color="var(--accent)" /> 2. Paste Job Description (Optional)
-                    </h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem', margin: 0 }}>
+                            <Target size={20} color="var(--accent)" /> 2. Paste Job Description (Optional)
+                        </h3>
+                        {jobDescription && (
+                            <button
+                                onClick={() => setJobDescription('')}
+                                style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.8rem', cursor: 'pointer', opacity: 0.7 }}
+                            >
+                                Clear
+                            </button>
+                        )}
+                    </div>
                     <textarea
                         className="input-group"
                         placeholder="Paste the job requirements here for matching..."
