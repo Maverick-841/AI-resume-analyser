@@ -71,7 +71,12 @@ export default function KanbanBoard() {
     return (
         <div className="container">
             <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Job Tracker</h2>
+                <h2 style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+                    Job Tracker
+                    <span style={{ fontSize: '1rem', color: 'var(--text-muted)', marginLeft: '1rem', fontWeight: 'normal' }}>
+                        ({jobs.length} Total)
+                    </span>
+                </h2>
                 <button className="btn btn-primary" onClick={() => setShowModal(true)}>
                     <Plus size={20} /> Add Job
                 </button>
