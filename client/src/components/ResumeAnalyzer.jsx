@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../api';
-import { Upload, CheckCircle, AlertCircle, Sparkles, Wand2, FileType, Target, Zap } from 'lucide-react';
+import { Upload, CheckCircle, AlertCircle, Sparkles, Wand2, FileType, Target, Zap, Copy } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ResumeAnalyzer() {
@@ -8,6 +8,7 @@ export default function ResumeAnalyzer() {
     const [jobDescription, setJobDescription] = useState('');
     const [loading, setLoading] = useState(false);
     const [analysis, setAnalysis] = useState(null);
+    const [copiedIndex, setCopiedIndex] = useState(null);
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -149,9 +150,29 @@ export default function ResumeAnalyzer() {
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
                                     {analysis.smartRewrites.map((item, i) => (
-                                        <div key={i} style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border)' }}>
+                                        <div key={i} style={{ padding: '1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid var(--border)', position: 'relative' }}>
                                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontStyle: 'italic' }}>Original: {item.original}</p>
-                                            <p style={{ color: 'var(--success)', fontWeight: '500' }}>→ {item.improved}</p>
+                                            <p style={{ color: 'var(--success)', fontWeight: '500', paddingRight: '2rem' }}>→ {item.improved}</p>
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(item.improved);
+                                                    setCopiedIndex(i);
+                                                    setTimeout(() => setCopiedIndex(null), 2000);
+                                                }}
+                                                style={{
+                                                    position: 'absolute',
+                                                    top: '0.5rem',
+                                                    right: '0.5rem',
+                                                    background: 'none',
+                                                    border: 'none',
+                                                    color: copiedIndex === i ? 'var(--success)' : 'var(--text-muted)',
+                                                    cursor: 'pointer',
+                                                    padding: '0.25rem'
+                                                }}
+                                                title="Copy to clipboard"
+                                            >
+                                                {copiedIndex === i ? <CheckCircle size={14} /> : <Copy size={14} />}
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
