@@ -3,7 +3,7 @@ import { useAuth } from './context/AuthContext';
 import Auth from './components/Auth';
 import KanbanBoard from './components/KanbanBoard';
 import ResumeAnalyzer from './components/ResumeAnalyzer';
-import { LayoutDashboard, FileText, LogOut, Briefcase } from 'lucide-react';
+import { LayoutDashboard, FileText, LogOut, Briefcase, Github } from 'lucide-react';
 
 function App() {
     const { user, logout, loading } = useAuth();
@@ -46,6 +46,21 @@ function App() {
                     >
                         <FileText size={20} /> AI Resume Analyzer
                     </button>
+                    <a
+                        href="https://github.com/Maverick-841/AI-resume-analyser"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn"
+                        style={{
+                            color: 'var(--text-muted)',
+                            justifyContent: 'flex-start',
+                            textDecoration: 'none',
+                            marginTop: '0.5rem',
+                            fontSize: '0.875rem'
+                        }}
+                    >
+                        <Github size={20} /> GitHub Repo
+                    </a>
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
