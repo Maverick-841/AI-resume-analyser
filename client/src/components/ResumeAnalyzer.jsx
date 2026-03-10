@@ -85,6 +85,9 @@ export default function ResumeAnalyzer() {
                         value={jobDescription}
                         onChange={(e) => setJobDescription(e.target.value)}
                     />
+                    <div style={{ textAlign: 'right', fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                        {jobDescription.length} characters
+                    </div>
                 </div>
             </div>
 
