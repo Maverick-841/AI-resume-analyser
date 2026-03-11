@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import api from '../api';
-import { Plus, Briefcase, MapPin, ExternalLink, Trash2 } from 'lucide-react';
+import { Plus, Briefcase, MapPin, ExternalLink, Trash2, RotateCcw } from 'lucide-react';
 
 const COLUMNS = ['Applied', 'Interview', 'Rejected', 'Offer'];
 
@@ -78,9 +78,19 @@ export default function KanbanBoard() {
                         ({jobs.length} Total)
                     </span>
                 </h2>
-                <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                    <Plus size={20} /> Add Job
-                </button>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button
+                        className="btn"
+                        onClick={fetchJobs}
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'white', padding: '0.5rem 1rem' }}
+                        title="Refresh Job List"
+                    >
+                        <RotateCcw size={18} />
+                    </button>
+                    <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+                        <Plus size={20} /> Add Job
+                    </button>
+                </div>
             </header>
 
             <div style={{ marginBottom: '2rem' }}>
