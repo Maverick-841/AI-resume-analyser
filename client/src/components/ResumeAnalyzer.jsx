@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../api';
-import { Upload, CheckCircle, AlertCircle, Sparkles, Wand2, FileType, Target, Zap, Copy } from 'lucide-react';
+import { Upload, CheckCircle, AlertCircle, Sparkles, Wand2, FileType, Target, Zap, Copy, Download, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ResumeAnalyzer() {
@@ -9,16 +9,19 @@ export default function ResumeAnalyzer() {
     const [loading, setLoading] = useState(false);
     const [analysis, setAnalysis] = useState(null);
     const [copiedIndex, setCopiedIndex] = useState(null);
+    const [error, setError] = useState(null);
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
+        setError(null);
     };
 
     const handleAnalyze = async () => {
         if (!file) {
-            alert('Please select a resume file (PDF or TXT) first.');
+            setError('Please select a resume file (PDF or TXT) first.');
             return;
         }
+        setError(null);
         setAnalysis(null);
         setLoading(true);
         const formData = new FormData();
@@ -34,12 +37,61 @@ export default function ResumeAnalyzer() {
             const detail = err.response?.data?.error || '';
 
             if (detail.includes('API key')) {
-                alert('OpenAI API Key is missing or invalid. Please check your server .env file.');
+                setError('OpenAI API Key is missing or invalid. Please check your server .env file.');
             } else {
-                alert(`${msg}\n${detail}`);
+                setError(`${msg}: ${detail}`);
             }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const downloadReport = () => {
+        if (!analysis) return;
+        
+        let report = `AI RESUME ANALYSIS REPORT\n`;
+        report += `==========================\n\n`;
+        if (analysis.matchScore !== undefined) {
+            report += `JD Match Score: ${analysis.matchScore}%\n`;
+        }
+        report += `Overall ATS Score: ${analysis.score}/100\n\n`;
+        
+        report += `TOP STRENGTHS:\n`;
+        analysis.strengths.forEach(s => report += `- ${s}\n`);
+        
+        report += `\nCRITICAL GAPS:\n`;
+        analysis.weaknesses.forEach(w => report += `- ${w}\n`);
+        
+        if (analysis.smartRewrites) {
+            report += `\nSMART REWRITES:\n`;
+            analysis.smartRewrites.forEach(item => {
+                report += `Original: ${item.original}\n`;
+                report += `Improved: ${item.improved}\n\n`;
+            });
+        }
+        
+        report += `MISSING KEYWORDS:\n`;
+        report += analysis.keywords.join(', ') + '\n';
+
+        const blob = new Blob([report], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `Resume_Analysis_${new Date().toLocaleDateString()}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    const copyToClipboard = async (text, index) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopiedIndex(index);
+            setTimeout(() => setCopiedIndex(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy!', err);
+            alert('Failed to copy to clipboard.');
         }
     };
 
@@ -50,12 +102,27 @@ export default function ResumeAnalyzer() {
                 <p style={{ color: 'var(--text-muted)' }}>Upload your resume (PDF or TXT) and paste the Job Description for a detailed compatibility analysis.</p>
             </header>
 
+            <AnimatePresence>
+                {error && (
+                    <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+                    >
+                        <XCircle size={20} />
+                        <span style={{ flex: 1 }}>{error}</span>
+                        <button onClick={() => setError(null)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>✕</button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
                 <div className="glass" style={{ padding: '2rem' }}>
                     <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem', fontSize: '1.1rem' }}>
                         <FileType size={20} color="var(--primary)" /> 1. Upload Resume
                     </h3>
-                    <div style={{ textAlign: 'center', border: '2px dashed var(--border)', padding: '2rem', borderRadius: '12px', background: 'rgba(255,255,255,0.02)' }}>
+                    <div style={{ textAlign: 'center', border: '2px dashed var(--border)', padding: '2rem', borderRadius: '12px', background: 'rgba(255,255,255,0.02)', transition: 'border-color 0.2s' }}>
                         <Upload size={32} style={{ color: 'var(--text-muted)', marginBottom: '1rem' }} />
                         <input type="file" accept=".pdf,.txt" onChange={handleFileChange} style={{ display: 'none' }} id="resume-upload" />
                         <label htmlFor="resume-upload" className="btn" style={{ background: 'var(--primary)', color: 'white', width: '100%', cursor: 'pointer', justifyContent: 'center' }}>
@@ -72,7 +139,9 @@ export default function ResumeAnalyzer() {
                         {jobDescription && (
                             <button
                                 onClick={() => setJobDescription('')}
-                                style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.8rem', cursor: 'pointer', opacity: 0.7 }}
+                                style={{ background: 'none', border: 'none', color: 'var(--danger)', fontSize: '0.8rem', cursor: 'pointer', opacity: 0.7, transition: 'opacity 0.2s' }}
+                                onMouseEnter={(e) => e.target.style.opacity = '1'}
+                                onMouseLeave={(e) => e.target.style.opacity = '0.7'}
                             >
                                 Clear
                             </button>
@@ -91,7 +160,7 @@ export default function ResumeAnalyzer() {
                 </div>
             </div>
 
-            <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '3rem', display: 'flex', justifyContent: 'center', gap: '1rem' }}>
                 <button
                     className="btn btn-primary"
                     onClick={handleAnalyze}
@@ -100,6 +169,15 @@ export default function ResumeAnalyzer() {
                 >
                     {loading ? 'Processing AI Magic...' : <><Sparkles size={20} /> Analyze & Match Now</>}
                 </button>
+                {analysis && (
+                    <button
+                        className="btn"
+                        onClick={downloadReport}
+                        style={{ padding: '1rem 2rem', fontSize: '1.1rem', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid var(--border)' }}
+                    >
+                        <Download size={20} /> Download Report
+                    </button>
+                )}
             </div>
 
             <AnimatePresence>
@@ -157,11 +235,7 @@ export default function ResumeAnalyzer() {
                                             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem', fontStyle: 'italic' }}>Original: {item.original}</p>
                                             <p style={{ color: 'var(--success)', fontWeight: '500', paddingRight: '2rem' }}>→ {item.improved}</p>
                                             <button
-                                                onClick={() => {
-                                                    navigator.clipboard.writeText(item.improved);
-                                                    setCopiedIndex(i);
-                                                    setTimeout(() => setCopiedIndex(null), 2000);
-                                                }}
+                                                onClick={() => copyToClipboard(item.improved, i)}
                                                 style={{
                                                     position: 'absolute',
                                                     top: '0.5rem',
@@ -170,7 +244,8 @@ export default function ResumeAnalyzer() {
                                                     border: 'none',
                                                     color: copiedIndex === i ? 'var(--success)' : 'var(--text-muted)',
                                                     cursor: 'pointer',
-                                                    padding: '0.25rem'
+                                                    padding: '0.25rem',
+                                                    transition: 'color 0.2s'
                                                 }}
                                                 title="Copy to clipboard"
                                             >
